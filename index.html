@@ -60,9 +60,31 @@
         <div id="resultContainer"></div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // Fungsi untuk mengeset tanggal hari ini
+        function setTanggalHariIni() {
             const today = new Date();
-            document.getElementById('tglInput').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const inputTgl = document.getElementById('tglInput');
+            
+            // Cegah pembaruan jika nilainya sudah sama agar tidak mengganggu interaksi user
+            if (inputTgl && inputTgl.value !== formattedDate) {
+                inputTgl.value = formattedDate;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set tanggal awal saat halaman dimuat
+            setTanggalHariIni();
+
+            // Cek pergantian hari setiap 1 menit (60000 ms) jika web terus dibuka
+            setInterval(setTanggalHariIni, 60000);
+
+            // Cek pergantian hari setiap kali user beralih dan kembali ke tab ini
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    setTanggalHariIni();
+                }
+            });
         });
 
         const hariVal = { 0: 5, 1: 4, 2: 3, 3: 7, 4: 8, 5: 6, 6: 9 };
