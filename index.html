@@ -64,6 +64,7 @@
             const today = new Date();
             document.getElementById('tglInput').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         });
+
         const hariVal = { 0: 5, 1: 4, 2: 3, 3: 7, 4: 8, 5: 6, 6: 9 };
         const hariName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const pasaranName = ['Wage', 'Kliwon', 'Legi', 'Pahing', 'Pon'];
@@ -71,33 +72,87 @@
         const arahNogoDino = { 'Legi': 'Timur (Kejayaan)', 'Pahing': 'Selatan (Wibawa)', 'Pon': 'Barat (Kekayaan)', 'Wage': 'Utara (Kestabilan)', 'Kliwon': 'Tengah (Spiritual)' };
         const mistikLama = { '0':'1', '1':'0', '2':'5', '5':'2', '3':'8', '8':'3', '4':'7', '7':'4', '6':'9', '9':'6' };
         const indexAngka = { '0':'5', '1':'6', '2':'7', '3':'8', '4':'9', '5':'0', '6':'1', '7':'2', '8':'3', '9':'4' };
-        function getUnik(arr) { return [...new Set(arr.map(String))]; }
+
+        const mod = (n, m) => ((n % m) + m) % m;
+        function getUnik(arr) { return [...new Set(arr.filter(x => x !== undefined && x !== null).map(String))]; }
+
         function copyTeks(teks, btn) {
             navigator.clipboard.writeText(teks).then(() => {
                 let old = btn.innerText; btn.innerText = "COPIED!"; setTimeout(() => { btn.innerText = old; }, 1500);
             });
         }
+
         function eksekusiWeton() {
             const dateVal = document.getElementById('tglInput').value;
             if(!dateVal) { alert('Pilih tanggal!'); return; }
-            document.getElementById("resultContainer").style.display = "none";
-            document.getElementById("loader").style.display = "block";
-            setTimeout(() => { document.getElementById("loader").style.display = "none"; prosesAnalisisReal(dateVal); }, 800);
+            
+            const loader = document.getElementById("loader");
+            const result = document.getElementById("resultContainer");
+            
+            result.style.display = "none";
+            loader.style.display = "block";
+            
+            setTimeout(() => { 
+                loader.style.display = "none"; 
+                prosesAnalisisReal(dateVal); 
+            }, 200);
         }
+
         function prosesAnalisisReal(dateStr) {
-            let d = new Date(dateStr + "T00:00:00"); 
-            let diffDays = Math.floor((new Date(dateStr + "T00:00:00Z") - new Date("1970-01-01T00:00:00Z")) / 86400000);
-            let pasaranIndex = (diffDays % 5); if (pasaranIndex < 0) pasaranIndex += 5;
-            let dayIndex = d.getDay();
-            let hName = hariName[dayIndex], pName = pasaranName[pasaranIndex];
-            let hVal = hariVal[dayIndex], pVal = pasaranVal[pName], neptu = hVal + pVal;
-            let seed = diffDays + neptu; 
-            let am = getUnik([neptu % 10, (neptu + hVal) % 10, (neptu + pVal) % 10, (seed * 3) % 10]).slice(0,4);
-            while(am.length < 4) { am.push((parseInt(am[am.length-1]) + 1) % 10); am = getUnik(am); }
-            let ai = getUnik([mistikLama[am[0]], indexAngka[am[1]], (seed * 7) % 10]).slice(0,3);
-            while(ai.length < 3) { ai.push((parseInt(ai[0]) + 3) % 10); ai = getUnik(ai); }
+            const parts = dateStr.split('-');
+            if(parts.length !== 3) return;
+            
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+
+            const targetDate = new Date(Date.UTC(year, month, day));
+            const epochDate = new Date(Date.UTC(1970, 0, 1));
+            const diffDays = Math.floor((targetDate - epochDate) / 86400000);
+
+            const dayIndex = targetDate.getUTCDay();
+            const pasaranIndex = mod(diffDays, 5);
+
+            const hName = hariName[dayIndex];
+            const pName = pasaranName[pasaranIndex];
+            const hVal = hariVal[dayIndex];
+            const pVal = pasaranVal[pName];
+            const neptu = hVal + pVal;
+
+            const seed = Math.abs(diffDays + neptu);
+
+            let am = getUnik([mod(neptu, 10), mod(neptu + hVal, 10), mod(neptu + pVal, 10), mod(seed * 3, 10)]);
+            let extra = 0;
+            while(am.length < 4) {
+                let nextVal = String(mod((parseInt(am[am.length - 1] || 0) + 1 + extra), 10));
+                if(!am.includes(nextVal)) {
+                    am.push(nextVal);
+                } else {
+                    extra++;
+                }
+            }
+            am = am.slice(0, 4);
+
+            let mVal = mistikLama[am[0]] ?? '0';
+            let iVal = indexAngka[am[1]] ?? '1';
+            let sVal = String(mod(seed * 7, 10));
+
+            let ai = getUnik([mVal, iVal, sVal]);
+            extra = 0;
+            while(ai.length < 3) {
+                let nextVal = String(mod((parseInt(ai[0] || 0) + 3 + extra), 10));
+                if(!ai.includes(nextVal)) {
+                    ai.push(nextVal);
+                } else {
+                    extra++;
+                }
+            }
+            ai = ai.slice(0, 3);
+
             let strBBFS = getUnik([...am, ...ai, hVal, pVal]).slice(0, 6).join("");
-            let duaD_1 = `${am[0]}${ai[0]}`, duaD_2 = `${am[1]}${ai[1]}`;
+            let duaD_1 = `${am[0]}${ai[0]}`;
+            let duaD_2 = `${am[1]}${ai[1]}`;
+
             document.getElementById("resultContainer").innerHTML = `
                 <div class="weton-card">
                     <span>WETON HARI INI</span>
@@ -124,6 +179,7 @@
                     <div class="grid-row"><span class="lbl">TARGET 4D</span><span class="val">${am[2]}${ai[2]}${duaD_1}</span></div>
                     <div class="grid-row" style="border:none;"><span class="lbl">TARGET 3D</span><span class="val">${ai[2]}${duaD_1}</span></div>
                 </div>`;
+
             document.getElementById("resultContainer").style.display = "flex";
             setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); }, 100);
         }
