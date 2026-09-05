@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pusaka Weton Pro - Angka Harian Jawa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap');
+        :root { --bg-deep: #0a0505; --gold-royal: #FFD700; --red-mystic: #b30000; --green-jade: #00ff88; --text-dim: #cca876; --card-bg: #110808; }
+        body { font-family: 'Noto Serif', serif; background-color: var(--bg-deep); color: #f4e8c1; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; background-image: radial-gradient(circle at top, #260505 0%, transparent 50%), linear-gradient(0deg, rgba(255, 215, 0, 0.02) 1px, transparent 1px); }
+        .container { background: var(--card-bg); padding: 30px 25px; border-radius: 12px; border: 2px solid var(--red-mystic); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(179, 0, 0, 0.2); width: 100%; max-width: 520px; position: relative; }
+        .container::before { content: '☯ ALGORITMA WETON ☯'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--bg-deep); padding: 0 15px; color: var(--gold-royal); font-size: 1rem; font-weight: bold; letter-spacing: 3px; border: 1px solid var(--gold-royal); border-radius: 20px; white-space: nowrap; }
+        .header-title { color: var(--gold-royal); font-size: 1.7rem; font-weight: 700; margin-top: 15px; margin-bottom: 5px; text-align: center; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+        .version { color: var(--text-dim); font-size: 0.8rem; text-align: center; margin-bottom: 25px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; border-bottom: 1px dashed var(--red-mystic); padding-bottom: 10px; }
+        .input-group { margin-bottom: 20px; text-align: center; }
+        .input-group label { display: block; color: var(--gold-royal); font-size: 0.85rem; margin-bottom: 8px; font-weight: 700; letter-spacing: 1px;}
+        input[type="date"] { width: 100%; padding: 15px; font-size: 1.2rem; font-weight: 700; text-align: center; background: #000; color: var(--green-jade); border: 2px solid var(--red-mystic); border-radius: 8px; box-sizing: border-box; font-family: 'Noto Serif', serif; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) sepia(1) saturate(5) hue-rotate(90deg); cursor: pointer; }
+        input[type="date"]:focus { outline: none; border-color: var(--gold-royal); box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+        .btn-primary { width: 100%; padding: 16px; font-size: 1rem; font-weight: 700; font-family: 'Noto Serif', serif; border-radius: 8px; cursor: pointer; transition: all 0.2s; letter-spacing: 3px; margin-bottom: 10px; background: linear-gradient(135deg, #4a0000, var(--red-mystic)); color: #fff; border: 1px solid var(--gold-royal); text-transform: uppercase; box-shadow: 0 4px 15px rgba(179, 0, 0, 0.6); text-shadow: 1px 1px 2px #000; }
+        .btn-primary:active { transform: scale(0.98); }
+        #loader { display: none; color: var(--gold-royal); font-size: 0.9rem; text-align: center; margin: 20px 0; font-weight: 700; font-style: italic; letter-spacing: 1px; animation: blink 1s infinite;}
+        @keyframes blink { 50% { opacity: 0.5; } }
+        #resultContainer { display: none; flex-direction: column; gap: 16px; animation: slideUp 0.8s ease-out; margin-top: 15px;}
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .box { background: rgba(0, 0, 0, 0.6); border: 1px solid #331111; border-radius: 8px; padding: 18px; position: relative; box-shadow: inset 0 0 15px rgba(0,0,0,1);}
+        .box-title { color: var(--gold-royal); font-size: 0.95rem; font-weight: bold; letter-spacing: 2px; margin-bottom: 12px; border-bottom: 1px solid #4a0000; padding-bottom: 8px; text-align: center;}
+        .weton-card { background: radial-gradient(circle at top, #220505, #000); border: 1px dashed var(--gold-royal); padding: 15px; text-align: center; border-radius: 8px;}
+        .weton-card span { font-size: 0.8rem; color: var(--text-dim); display: block; margin-bottom: 5px; font-weight: bold; letter-spacing: 1px;}
+        .weton-card .weton-name { font-size: 1.8rem; color: var(--green-jade); font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);}
+        .weton-card .weton-neptu { font-size: 1.1rem; color: #fff; margin-top: 5px; font-weight: bold; letter-spacing: 2px;}
+        .grid-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted #331111; padding: 10px 0;}
+        .grid-row:last-child { border: none; padding-bottom: 0; }
+        .grid-row .lbl { color: var(--text-dim); font-size: 0.8rem; font-weight: bold;}
+        .grid-row .val { color: #fff; font-size: 1.1rem; font-weight: bold; letter-spacing: 3px; text-align: right;}
+        .bbfs-display { display: flex; justify-content: center; align-items: center; flex-direction: column; background: #000; border: 1px dashed var(--red-mystic); padding: 15px; border-radius: 6px; margin-top: 10px;}
+        .bbfs-display span { font-size: 0.75rem; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 8px; font-weight: bold;}
+        .bbfs-display strong { font-size: 2.2rem; color: var(--gold-royal); letter-spacing: 15px; text-shadow: 0 0 15px rgba(255,215,0,0.2);}
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .item-card { background: #000; border: 1px solid #220505; border-radius: 6px; padding: 15px; text-align: center; border-left: 4px solid var(--green-jade);}
+        .item-card span { display: block; color: var(--text-dim); font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px;}
+        .item-card strong { color: #fff; font-size: 1.4rem; font-weight: bold; letter-spacing: 3px;}
+        .btn-copy { background: #111; border: 1px solid var(--gold-royal); color: var(--gold-royal); padding: 5px 15px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; transition: 0.2s; font-weight: bold; margin-top: 10px;}
+        .btn-copy:hover { background: var(--gold-royal); color: #000; }
+        .arah-box { text-align: center; margin-top: 15px; padding: 10px; background: #050202; border: 1px solid #331111; border-radius: 6px;}
+        .arah-box .lbl { color: var(--red-mystic); font-size: 0.75rem; font-weight: bold; display: block; margin-bottom: 4px; letter-spacing: 1px;}
+        .arah-box .val { color: #fff; font-size: 0.95rem; font-weight: bold; letter-spacing: 1px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-title">PUSAKA WETON PRO</div>
+        <div class="version">ANALISIS ANGKA HARIAN REAL-TIME</div>
+        <div class="input-group">
+            <label>TENTUKAN TANGGAL TERAWANGAN</label>
+            <input type="date" id="tglInput">
+        </div>
+        <button class="btn-primary" onclick="eksekusiWeton()">BACA KITAB PRIMBON 📜</button>
+        <div id="loader">Menghitung Neptu & Menyelaraskan Nogo Dino...</div>
+        <div id="resultContainer"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            document.getElementById('tglInput').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        });
+        const hariVal = { 0: 5, 1: 4, 2: 3, 3: 7, 4: 8, 5: 6, 6: 9 };
+        const hariName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const pasaranName = ['Wage', 'Kliwon', 'Legi', 'Pahing', 'Pon'];
+        const pasaranVal = { 'Wage': 4, 'Kliwon': 8, 'Legi': 5, 'Pahing': 9, 'Pon': 7 };
+        const arahNogoDino = { 'Legi': 'Timur (Kejayaan)', 'Pahing': 'Selatan (Wibawa)', 'Pon': 'Barat (Kekayaan)', 'Wage': 'Utara (Kestabilan)', 'Kliwon': 'Tengah (Spiritual)' };
+        const mistikLama = { '0':'1', '1':'0', '2':'5', '5':'2', '3':'8', '8':'3', '4':'7', '7':'4', '6':'9', '9':'6' };
+        const indexAngka = { '0':'5', '1':'6', '2':'7', '3':'8', '4':'9', '5':'0', '6':'1', '7':'2', '8':'3', '9':'4' };
+        function getUnik(arr) { return [...new Set(arr.map(String))]; }
+        function copyTeks(teks, btn) {
+            navigator.clipboard.writeText(teks).then(() => {
+                let old = btn.innerText; btn.innerText = "COPIED!"; setTimeout(() => { btn.innerText = old; }, 1500);
+            });
+        }
+        function eksekusiWeton() {
+            const dateVal = document.getElementById('tglInput').value;
+            if(!dateVal) { alert('Pilih tanggal!'); return; }
+            document.getElementById("resultContainer").style.display = "none";
+            document.getElementById("loader").style.display = "block";
+            setTimeout(() => { document.getElementById("loader").style.display = "none"; prosesAnalisisReal(dateVal); }, 800);
+        }
+        function prosesAnalisisReal(dateStr) {
+            let d = new Date(dateStr + "T00:00:00"); 
+            let diffDays = Math.floor((new Date(dateStr + "T00:00:00Z") - new Date("1970-01-01T00:00:00Z")) / 86400000);
+            let pasaranIndex = (diffDays % 5); if (pasaranIndex < 0) pasaranIndex += 5;
+            let dayIndex = d.getDay();
+            let hName = hariName[dayIndex], pName = pasaranName[pasaranIndex];
+            let hVal = hariVal[dayIndex], pVal = pasaranVal[pName], neptu = hVal + pVal;
+            let seed = diffDays + neptu; 
+            let am = getUnik([neptu % 10, (neptu + hVal) % 10, (neptu + pVal) % 10, (seed * 3) % 10]).slice(0,4);
+            while(am.length < 4) { am.push((parseInt(am[am.length-1]) + 1) % 10); am = getUnik(am); }
+            let ai = getUnik([mistikLama[am[0]], indexAngka[am[1]], (seed * 7) % 10]).slice(0,3);
+            while(ai.length < 3) { ai.push((parseInt(ai[0]) + 3) % 10); ai = getUnik(ai); }
+            let strBBFS = getUnik([...am, ...ai, hVal, pVal]).slice(0, 6).join("");
+            let duaD_1 = `${am[0]}${ai[0]}`, duaD_2 = `${am[1]}${ai[1]}`;
+            document.getElementById("resultContainer").innerHTML = `
+                <div class="weton-card">
+                    <span>WETON HARI INI</span>
+                    <div class="weton-name">${hName.toUpperCase()} ${pName.toUpperCase()}</div>
+                    <div class="weton-neptu">TOTAL NEPTU: ${hVal} + ${pVal} = <span style="color:var(--gold-royal);">${neptu}</span></div>
+                    <div class="arah-box"><span class="lbl">ARAH NOGO DINO</span><span class="val">${arahNogoDino[pName]}</span></div>
+                </div>
+                <div class="box">
+                    <div class="box-title">📊 RUMUSAN METAFISIKA</div>
+                    <div class="grid-row"><span class="lbl">ANGKA MAIN</span><span class="val" style="color:var(--gold-royal);">${am.join("")}</span></div>
+                    <div class="grid-row" style="border:none;"><span class="lbl">ANGKA IKUT</span><span class="val" style="color:var(--green-jade);">${ai.join("")}</span></div>
+                    <div class="bbfs-display"><span>BBFS 6 DIGIT MUTLAK</span><strong>${strBBFS}</strong><button class="btn-copy" onclick="copyTeks('${strBBFS}', this)">SALIN BBFS</button></div>
+                </div>
+                <div class="grid-2">
+                    <div class="item-card"><span>COLOK BEBAS</span><strong style="color:var(--green-jade);">${am[0]} / ${ai[0]}</strong></div>
+                    <div class="item-card" style="border-color:var(--gold-royal); border-left-color:var(--gold-royal);">
+                        <span style="color:var(--gold-royal);">SHIO</span><strong style="color:#fff;">${(neptu % 12) || 12}</strong>
+                    </div>
+                </div>
+                <div class="box" style="border-color:var(--red-mystic); background:radial-gradient(circle at top right, #2a0505, #000);">
+                    <div class="box-title" style="color:var(--gold-royal); border-bottom-color:var(--red-mystic);">🎯 SNIPER LURUS</div>
+                    <div style="margin-bottom:15px; text-align:center;"><span style="color:var(--text-dim); font-size:0.8rem; display:block;">TOP 2D (BOM)</span>
+                    <strong style="color:#fff; font-size:1.8rem; letter-spacing:5px; text-shadow:0 0 10px rgba(255,0,0,0.5);">${duaD_1} * ${duaD_2}</strong></div>
+                    <div class="grid-row"><span class="lbl">TARGET 4D</span><span class="val">${am[2]}${ai[2]}${duaD_1}</span></div>
+                    <div class="grid-row" style="border:none;"><span class="lbl">TARGET 3D</span><span class="val">${ai[2]}${duaD_1}</span></div>
+                </div>`;
+            document.getElementById("resultContainer").style.display = "flex";
+            setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); }, 100);
+        }
+    </script>
+</body>
+</html>
