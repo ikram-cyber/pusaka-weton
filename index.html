@@ -45,6 +45,7 @@
         .arah-box { text-align: center; margin-top: 15px; padding: 10px; background: #050202; border: 1px solid #331111; border-radius: 6px;}
         .arah-box .lbl { color: var(--red-mystic); font-size: 0.75rem; font-weight: bold; display: block; margin-bottom: 4px; letter-spacing: 1px;}
         .arah-box .val { color: #fff; font-size: 0.95rem; font-weight: bold; letter-spacing: 1px;}
+        .copyright { margin-top: 30px; text-align: center; font-size: 0.75rem; color: var(--text-dim); letter-spacing: 1.5px; border-top: 1px dashed #331111; padding-top: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -58,6 +59,10 @@
         <button class="btn-primary" onclick="eksekusiWeton()">BACA KITAB PRIMBON 📜</button>
         <div id="loader">Menghitung Neptu & Menyelaraskan Nogo Dino...</div>
         <div id="resultContainer"></div>
+        
+        <div class="copyright">
+            &copy; <span id="currentYear"></span> PUSAKA WETON PRO. ALL RIGHTS RESERVED.
+        </div>
     </div>
     <script>
         // Fungsi untuk mengeset tanggal hari ini
@@ -70,6 +75,9 @@
             if (inputTgl && inputTgl.value !== formattedDate) {
                 inputTgl.value = formattedDate;
             }
+
+            // Update tahun pada copyright secara dinamis
+            document.getElementById('currentYear').textContent = today.getFullYear();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
